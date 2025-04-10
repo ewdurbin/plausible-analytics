@@ -59,19 +59,21 @@ defmodule Plausible.Imported.GoogleAnalytics4Test do
 
       opts = Keyword.put(opts, :flush_interval_ms, 10)
 
-      expect(Plausible.HTTPClient.Mock, :post, fn "https://www.googleapis.com/oauth2/v4/token",
-                                                  headers,
-                                                  body ->
-        assert [{"content-type", "application/x-www-form-urlencoded"}] == headers
+      for _ <- Enum.take(@full_report_mock, 10) do
+        expect(Plausible.HTTPClient.Mock, :post, fn "https://www.googleapis.com/oauth2/v4/token",
+                                                    headers,
+                                                    body ->
+          assert [{"content-type", "application/x-www-form-urlencoded"}] == headers
 
-        assert %{
-                 grant_type: :refresh_token,
-                 redirect_uri: "http://localhost:8000/auth/google/callback",
-                 refresh_token: "redacted_refresh_token"
-               } = body
+          assert %{
+                   grant_type: :refresh_token,
+                   redirect_uri: "http://localhost:8000/auth/google/callback",
+                   refresh_token: "redacted_refresh_token"
+                 } = body
 
-        {:ok, %Finch.Response{status: 200, body: @refresh_token_body}}
-      end)
+          {:ok, %Finch.Response{status: 200, body: @refresh_token_body}}
+        end)
+      end
 
       for report <- @full_report_mock do
         expect(Plausible.HTTPClient.Mock, :post, fn _url, headers, _body, _opts ->
@@ -194,20 +196,36 @@ defmodule Plausible.Imported.GoogleAnalytics4Test do
 
       for report <- Enum.take(@full_report_mock, 4) do
         expect(Plausible.HTTPClient.Mock, :post, fn _url, headers, _body, _opts ->
-          assert [{"Authorization", "Bearer redacted_access_token"}] == headers
+          assert [{"Authorization", "Bearer 1/fFAGRNJru1FTz70BzhT3Zg"}] == headers
           {:ok, %Finch.Response{status: 200, body: report}}
         end)
       end
 
       expect(Plausible.HTTPClient.Mock, :post, fn _url, headers, _body, _opts ->
-        assert [{"Authorization", "Bearer redacted_access_token"}] == headers
+        assert [{"Authorization", "Bearer 1/fFAGRNJru1FTz70BzhT3Zg"}] == headers
         {:ok, %Finch.Response{status: 200, body: empty_custom_events}}
       end)
 
       for report <- Enum.drop(@full_report_mock, 5) do
         expect(Plausible.HTTPClient.Mock, :post, fn _url, headers, _body, _opts ->
-          assert [{"Authorization", "Bearer redacted_access_token"}] == headers
+          assert [{"Authorization", "Bearer 1/fFAGRNJru1FTz70BzhT3Zg"}] == headers
           {:ok, %Finch.Response{status: 200, body: report}}
+        end)
+      end
+
+      for _ <- Enum.take(@full_report_mock, 10) do
+        expect(Plausible.HTTPClient.Mock, :post, fn "https://www.googleapis.com/oauth2/v4/token",
+                                                    headers,
+                                                    body ->
+          assert [{"content-type", "application/x-www-form-urlencoded"}] == headers
+
+          assert %{
+                   grant_type: :refresh_token,
+                   redirect_uri: "http://localhost:8000/auth/google/callback",
+                   refresh_token: "redacted_refresh_token"
+                 } = body
+
+          {:ok, %Finch.Response{status: 200, body: @refresh_token_body}}
         end)
       end
 
@@ -255,13 +273,29 @@ defmodule Plausible.Imported.GoogleAnalytics4Test do
 
       opts = Keyword.put(opts, :flush_interval_ms, 10)
 
+      for _ <- Enum.take(@full_report_mock, 2) do
+        expect(Plausible.HTTPClient.Mock, :post, fn "https://www.googleapis.com/oauth2/v4/token",
+                                                    headers,
+                                                    body ->
+          assert [{"content-type", "application/x-www-form-urlencoded"}] == headers
+
+          assert %{
+                   grant_type: :refresh_token,
+                   redirect_uri: "http://localhost:8000/auth/google/callback",
+                   refresh_token: "redacted_refresh_token"
+                 } = body
+
+          {:ok, %Finch.Response{status: 200, body: @refresh_token_body}}
+        end)
+      end
+
       expect(Plausible.HTTPClient.Mock, :post, fn _url, headers, _body, _opts ->
-        assert [{"Authorization", "Bearer redacted_access_token"}] == headers
+        assert [{"Authorization", "Bearer 1/fFAGRNJru1FTz70BzhT3Zg"}] == headers
         {:ok, %Finch.Response{status: 200, body: List.first(@full_report_mock)}}
       end)
 
       expect(Plausible.HTTPClient.Mock, :post, fn _url, headers, _body, _opts ->
-        assert [{"Authorization", "Bearer redacted_access_token"}] == headers
+        assert [{"Authorization", "Bearer 1/fFAGRNJru1FTz70BzhT3Zg"}] == headers
 
         {:error,
          Plausible.HTTPClient.Non200Error.new(%Finch.Response{
@@ -306,9 +340,25 @@ defmodule Plausible.Imported.GoogleAnalytics4Test do
         assert await_clickhouse_count(query, count)
       end)
 
+      for _ <- Enum.take(@full_report_mock, 8) do
+        expect(Plausible.HTTPClient.Mock, :post, fn "https://www.googleapis.com/oauth2/v4/token",
+                                                    headers,
+                                                    body ->
+          assert [{"content-type", "application/x-www-form-urlencoded"}] == headers
+
+          assert %{
+                   grant_type: :refresh_token,
+                   redirect_uri: "http://localhost:8000/auth/google/callback",
+                   refresh_token: "redacted_refresh_token"
+                 } = body
+
+          {:ok, %Finch.Response{status: 200, body: @refresh_token_body}}
+        end)
+      end
+
       for report <- tl(@full_report_mock) do
         expect(Plausible.HTTPClient.Mock, :post, fn _url, headers, _body, _opts ->
-          assert [{"Authorization", "Bearer redacted_access_token"}] == headers
+          assert [{"Authorization", "Bearer 1/fFAGRNJru1FTz70BzhT3Zg"}] == headers
           {:ok, %Finch.Response{status: 200, body: report}}
         end)
       end
@@ -357,6 +407,24 @@ defmodule Plausible.Imported.GoogleAnalytics4Test do
       test "handles #{error_returned} gracefully", %{user: user, site: site} do
         future = DateTime.add(DateTime.utc_now(), 3600, :second)
 
+        for _ <- Enum.take(@full_report_mock, 3) do
+          expect(
+            Plausible.HTTPClient.Mock,
+            :post,
+            fn "https://www.googleapis.com/oauth2/v4/token", headers, body ->
+              assert [{"content-type", "application/x-www-form-urlencoded"}] == headers
+
+              assert %{
+                       grant_type: :refresh_token,
+                       redirect_uri: "http://localhost:8000/auth/google/callback",
+                       refresh_token: "redacted_refresh_token"
+                     } = body
+
+              {:ok, %Finch.Response{status: 200, body: @refresh_token_body}}
+            end
+          )
+        end
+
         {:ok, job} =
           Plausible.Imported.GoogleAnalytics4.new_import(
             site,
@@ -380,12 +448,12 @@ defmodule Plausible.Imported.GoogleAnalytics4Test do
           |> Keyword.put(:fetch_opts, max_attempts: 2, sleep_time: 50)
 
         expect(Plausible.HTTPClient.Mock, :post, fn _url, headers, _body, _opts ->
-          assert [{"Authorization", "Bearer redacted_access_token"}] == headers
+          assert [{"Authorization", "Bearer 1/fFAGRNJru1FTz70BzhT3Zg"}] == headers
           {:ok, %Finch.Response{status: 200, body: List.first(@full_report_mock)}}
         end)
 
         expect(Plausible.HTTPClient.Mock, :post, 2, fn _url, headers, _body, _opts ->
-          assert [{"Authorization", "Bearer redacted_access_token"}] == headers
+          assert [{"Authorization", "Bearer 1/fFAGRNJru1FTz70BzhT3Zg"}] == headers
 
           {:error, unquote(error_mock)}
         end)
@@ -429,9 +497,27 @@ defmodule Plausible.Imported.GoogleAnalytics4Test do
           assert await_clickhouse_count(query, count)
         end)
 
+        for _ <- Enum.take(@full_report_mock, 7) do
+          expect(
+            Plausible.HTTPClient.Mock,
+            :post,
+            fn "https://www.googleapis.com/oauth2/v4/token", headers, body ->
+              assert [{"content-type", "application/x-www-form-urlencoded"}] == headers
+
+              assert %{
+                       grant_type: :refresh_token,
+                       redirect_uri: "http://localhost:8000/auth/google/callback",
+                       refresh_token: "redacted_refresh_token"
+                     } = body
+
+              {:ok, %Finch.Response{status: 200, body: @refresh_token_body}}
+            end
+          )
+        end
+
         for report <- tl(@full_report_mock) do
           expect(Plausible.HTTPClient.Mock, :post, fn _url, headers, _body, _opts ->
-            assert [{"Authorization", "Bearer redacted_access_token"}] == headers
+            assert [{"Authorization", "Bearer 1/fFAGRNJru1FTz70BzhT3Zg"}] == headers
             {:ok, %Finch.Response{status: 200, body: report}}
           end)
         end
