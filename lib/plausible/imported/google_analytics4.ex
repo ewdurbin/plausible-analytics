@@ -126,6 +126,32 @@ defmodule Plausible.Imported.GoogleAnalytics4 do
 
           {:error, error, skip_purge?: true, skip_mark_failed?: true}
 
+        {:error, {:request_failed, details}} ->
+          site_import = Repo.preload(site_import, [:site, :imported_by])
+          dataset = Keyword.fetch!(details, :dataset)
+          offset = Keyword.fetch!(details, :offset)
+          {access_token, refresh_token, token_expires_at} = auth
+
+          resume_import_opts = [
+            property: property,
+            label: property,
+            start_date: date_range.first,
+            end_date: date_range.last,
+            access_token: access_token,
+            refresh_token: refresh_token,
+            token_expires_at: token_expires_at,
+            resume_from_import_id: site_import.id,
+            resume_from_dataset: dataset,
+            resume_from_offset: offset,
+            job_opts: [schedule_in: {5, :minutes}, unique: nil]
+          ]
+
+          new_import(
+            site_import.site,
+            site_import.imported_by,
+            resume_import_opts
+          )
+
         other ->
           other
       end

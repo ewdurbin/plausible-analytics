@@ -14,7 +14,7 @@ defmodule Plausible.Google.GA4.API do
           expires_at :: String.t()
         }
 
-  @per_page 200_000
+  @per_page 50_000
   @backoff_factor :timer.seconds(10)
   @max_attempts 5
 
@@ -80,24 +80,16 @@ defmodule Plausible.Google.GA4.API do
       "[#{inspect(__MODULE__)}:#{property}] Starting import from #{date_range.first} to #{date_range.last}"
     )
 
-    with {:ok, access_token} <- Google.API.maybe_refresh_token(auth) do
-      do_import_analytics(date_range, property, access_token, persist_fn, fetch_opts, resume_opts)
-    end
+    do_import_analytics(date_range, property, auth, persist_fn, fetch_opts, resume_opts)
   end
 
-  defp do_import_analytics(
-         date_range,
-         property,
-         access_token,
-         persist_fn,
-         fetch_opts,
-         [] = _resume_opts
-       ) do
+  defp do_import_analytics(date_range, property, auth, persist_fn, fetch_opts, [] = _resume_opts) do
     Enum.reduce_while(GA4.ReportRequest.full_report(), :ok, fn report_request, :ok ->
       Logger.debug(
         "[#{inspect(__MODULE__)}:#{property}] Starting to import #{report_request.dataset}"
       )
 
+      {_, {access_token, _}} = Google.API.do_refresh_token(elem(auth, 1))
       report_request = prepare_request(report_request, date_range, property, access_token)
 
       case fetch_and_persist(report_request, persist_fn: persist_fn, fetch_opts: fetch_opts) do
@@ -107,14 +99,7 @@ defmodule Plausible.Google.GA4.API do
     end)
   end
 
-  defp do_import_analytics(
-         date_range,
-         property,
-         access_token,
-         persist_fn,
-         fetch_opts,
-         resume_opts
-       ) do
+  defp do_import_analytics(date_range, property, auth, persist_fn, fetch_opts, resume_opts) do
     dataset = Keyword.fetch!(resume_opts, :dataset)
     offset = Keyword.fetch!(resume_opts, :offset)
 
@@ -131,6 +116,8 @@ defmodule Plausible.Google.GA4.API do
         else
           0
         end
+
+      {_, {access_token, _}} = Google.API.do_refresh_token(elem(auth, 1))
 
       report_request =
         report_request

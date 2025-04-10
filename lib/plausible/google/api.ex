@@ -112,7 +112,7 @@ defmodule Plausible.Google.API do
 
   def property?(value), do: String.starts_with?(value, "properties/")
 
-  defp do_refresh_token(refresh_token) do
+  def do_refresh_token(refresh_token) do
     case HTTP.refresh_auth_token(refresh_token) do
       {:ok, %{"access_token" => new_access_token, "expires_in" => expires_in}} ->
         expires_at = NaiveDateTime.add(NaiveDateTime.utc_now(), expires_in)
