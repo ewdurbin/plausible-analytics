@@ -6,13 +6,11 @@ defmodule Plausible.IngestRepo.Migrations.ImportedPagesRemoveOldTimeOnPageColumn
 
     execute """
     ALTER TABLE imported_pages
-    #{on_cluster}
     DROP COLUMN IF EXISTS time_on_page
     """
 
     execute """
     ALTER TABLE imported_pages
-    #{on_cluster}
     DROP COLUMN IF EXISTS active_visitors
     """
   end

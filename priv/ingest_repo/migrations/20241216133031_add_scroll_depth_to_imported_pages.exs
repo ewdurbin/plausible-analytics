@@ -6,7 +6,6 @@ defmodule Plausible.IngestRepo.Migrations.AddScrollDepthToImportedPages do
   def up do
     execute """
     ALTER TABLE imported_pages
-    #{@on_cluster}
     ADD COLUMN scroll_depth UInt8 DEFAULT 255
     """
   end
@@ -14,7 +13,6 @@ defmodule Plausible.IngestRepo.Migrations.AddScrollDepthToImportedPages do
   def down do
     execute """
     ALTER TABLE imported_pages
-    #{@on_cluster}
     DROP COLUMN IF EXISTS scroll_depth
     """
   end

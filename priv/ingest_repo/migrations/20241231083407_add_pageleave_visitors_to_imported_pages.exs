@@ -6,7 +6,6 @@ defmodule Plausible.IngestRepo.Migrations.AddPageleaveVisitorsToImportedPages do
   def up do
     execute """
     ALTER TABLE imported_pages
-    #{@on_cluster}
     ADD COLUMN pageleave_visitors UInt64
     """
   end
@@ -14,7 +13,6 @@ defmodule Plausible.IngestRepo.Migrations.AddPageleaveVisitorsToImportedPages do
   def down do
     execute """
     ALTER TABLE imported_pages
-    #{@on_cluster}
     DROP COLUMN pageleave_visitors
     """
   end
