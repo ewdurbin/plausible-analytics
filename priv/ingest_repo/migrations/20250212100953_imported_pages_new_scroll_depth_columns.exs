@@ -5,24 +5,22 @@ defmodule Plausible.IngestRepo.Migrations.ImportedPagesNewScrollDepthColumns do
 
   def up do
     execute """
-    ALTER TABLE imported_pages #{@on_cluster}
+    ALTER TABLE imported_pages
     ADD COLUMN total_scroll_depth UInt64
     """
 
     execute """
-    ALTER TABLE imported_pages #{@on_cluster}
+    ALTER TABLE imported_pages
     ADD COLUMN total_scroll_depth_visits UInt64
     """
 
     execute """
     ALTER TABLE imported_pages
-    #{@on_cluster}
     DROP COLUMN scroll_depth
     """
 
     execute """
     ALTER TABLE imported_pages
-    #{@on_cluster}
     DROP COLUMN pageleave_visitors
     """
   end

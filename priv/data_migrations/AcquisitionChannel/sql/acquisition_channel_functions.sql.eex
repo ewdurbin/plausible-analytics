@@ -1,11 +1,10 @@
 CREATE TABLE IF NOT EXISTS acquisition_channel_source_category
-<%= @on_cluster_statement %>
 (
     referrer_source String,
     category LowCardinality(String)
 )
 <%= if @on_cluster_statement != "" do %>
-ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{shard}/plausible_prod/acquisition_channel_source_category', '{replica}')
+ENGINE = ReplicatedMergeTree()
 <% else %>
 ENGINE = MergeTree()
 <% end %>
@@ -22,7 +21,6 @@ FROM (
 SETTINGS insert_quorum = <%= @insert_quorum %>;
 
 CREATE OR REPLACE DICTIONARY acquisition_channel_source_category_dict
-<%= @on_cluster_statement %>
 (
     `referrer_source` String,
     `category` String
@@ -33,12 +31,11 @@ LIFETIME(0)
 LAYOUT(hashed());
 
 CREATE TABLE IF NOT EXISTS acquisition_channel_paid_sources
-<%= @on_cluster_statement %>
 (
     referrer_source String
 )
 <%= if @on_cluster_statement != "" do %>
-ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{shard}/plausible_prod/acquisition_channel_paid_sources', '{replica}')
+ENGINE = ReplicatedMergeTree()
 <% else %>
 ENGINE = MergeTree()
 <% end %>
@@ -52,7 +49,6 @@ SELECT arrayJoin({paid_sources:Array(String)}) AS referrer_source
 SETTINGS insert_quorum = <%= @insert_quorum %>;
 
 CREATE OR REPLACE DICTIONARY acquisition_channel_paid_sources_dict
-<%= @on_cluster_statement %>
 (
     `referrer_source` String
 )
